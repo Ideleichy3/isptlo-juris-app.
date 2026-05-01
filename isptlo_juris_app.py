@@ -316,79 +316,82 @@ if st.session_state.modo == "Docente":
         }), use_container_width=True, hide_index=True)
 
     # =========================================================
-    # EXPORTAÇÃO PROFISSIONAL (Versão Memória ISPTLO v3.0)
+    # GERADOR DE PDF AUTOMÁTICO (Versão ISPTLO v3.1 - Sem Reruns)
     # =========================================================
     
-    # 1. Guardar a tabela na memória para o botão não a perder
-    if 'df_filtrado' in locals():
-        st.session_state['tabela_pdf'] = df_filtrado
+    # Este bloco só executa se a tabela (df_filtrado) existir e tiver dados
+    if 'df_filtrado' in locals() and not df_filtrado.empty:
+        from fpdf import FPDF
+        import io
 
-    if st.button("📥 Gerar e Descarregar Recibo Oficial"):
-        # 2. Verificar se temos os dados guardados
-        if 'tabela_pdf' in st.session_state:
-            dados = st.session_state['tabela_pdf']
-            from fpdf import FPDF
-            
-            def fmt_kz(valor):
-                return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " Kz"
+        # 1. Função de formatação para o padrão de Angola
+        def fmt_kz(valor):
+            return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " Kz"
 
-            # Cálculos internos para segurança total
-            v_bruto = dados['Valor Bruto'].sum()
-            v_irt = v_bruto * 0.065
-            v_liquido = v_bruto - v_irt
-            
-            pdf = FPDF()
-            pdf.add_page()
-            
-            # Cabeçalho Institucional
-            pdf.set_font("Arial", "B", 16)
-            pdf.cell(0, 10, txt="INSTITUTO SUPERIOR POLITECNICO DO LIBOLO", ln=True, align='C')
-            pdf.set_font("Arial", "B", 12)
-            pdf.cell(0, 10, txt="DIRECCAO DE INVESTIGACAO CIENTIFICA E POS-GRADUACAO", ln=True, align='C')
-            pdf.ln(5)
-            pdf.line(10, 32, 200, 32)
-            pdf.ln(5)
+        # 2. Criar o PDF em memória (Streamlit Way)
+        pdf = FPDF()
+        pdf.add_page()
+        
+        # Cabeçalho
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(0, 10, txt="INSTITUTO SUPERIOR POLITECNICO DO LIBOLO", ln=True, align='C')
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(0, 8, txt="SISTEMA DE GESTAO DE JURIS - ISPTLO-JURIS", ln=True, align='C')
+        pdf.ln(10)
 
-            # Tabela de Detalhe (Capturando os dados da memória)
-            pdf.set_fill_color(31, 56, 100)
-            pdf.set_text_color(255, 255, 255)
-            pdf.set_font("Arial", "B", 10)
-            pdf.cell(90, 8, "Funcao no Juri", border=1, fill=True)
-            pdf.cell(40, 8, "Tipo", border=1, fill=True)
-            pdf.cell(50, 8, "Valor Bruto", border=1, fill=True, align='R')
+        # Beneficiário
+        nome_doc = docente_selecionado if 'docente_selecionado' in locals() else "DOCENTE ISPTLO"
+        pdf.set_font("Arial", "B", 11)
+        pdf.cell(0, 10, txt=f"BENEFICIARIO: {nome_doc.upper()}", ln=True)
+        pdf.set_font("Arial", "", 10)
+        pdf.cell(0, 7, txt="ASSUNTO: Recibo de Honorarios Profissionais", ln=True)
+        pdf.ln(5)
+
+        # Tabela de Detalhe (Puxando os dados da imagem image_15.png)
+        pdf.set_fill_color(31, 56, 100) # Azul ISPTLO
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_font("Arial", "B", 10)
+        pdf.cell(90, 8, "Funcao no Juri", border=1, fill=True)
+        pdf.cell(40, 8, "Tipo", border=1, fill=True)
+        pdf.cell(50, 8, "Valor Bruto", border=1, fill=True, align='R')
+        pdf.ln()
+        
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", "", 9)
+        for _, row in df_filtrado.iterrows():
+            pdf.cell(90, 8, str(row['Função']), border=1)
+            pdf.cell(40, 8, str(row['Tipo']), border=1)
+            pdf.cell(50, 8, fmt_kz(row['Valor Bruto']), border=1, align='R')
             pdf.ln()
-            
-            pdf.set_text_color(0, 0, 0)
-            pdf.set_font("Arial", "", 9)
-            for _, row in dados.iterrows():
-                pdf.cell(90, 8, str(row['Função']), border=1)
-                pdf.cell(40, 8, str(row['Tipo']), border=1)
-                pdf.cell(50, 8, fmt_kz(row['Valor Bruto']), border=1, align='R')
-                pdf.ln()
 
-            # Resumo Financeiro
-            pdf.ln(10)
-            pdf.set_font("Arial", "B", 11)
-            pdf.cell(130, 8, txt="TOTAL BRUTO MENSAL:", border=0)
-            pdf.cell(50, 8, txt=fmt_kz(v_bruto), border=0, align='R', ln=True)
-            pdf.set_font("Arial", "", 11)
-            pdf.cell(130, 8, txt="RETENCAO DE IRT (6,5%):", border=0)
-            pdf.cell(50, 8, txt=f"- {fmt_kz(v_irt)}", border=0, align='R', ln=True)
-            pdf.set_font("Arial", "B", 12)
-            pdf.cell(130, 10, txt="VALOR LIQUIDO A RECEBER:", border=0)
-            pdf.cell(50, 10, txt=fmt_kz(v_liquido), border=0, align='R', ln=True)
+        # Resumo Financeiro (Usando os valores reais do seu ecrã)
+        pdf.ln(10)
+        pdf.set_font("Arial", "B", 11)
+        pdf.cell(130, 8, txt="TOTAL BRUTO MENSAL:", border=0)
+        pdf.cell(50, 8, txt=fmt_kz(total_bruto), border=0, align='R', ln=True)
+        pdf.set_font("Arial", "", 11)
+        pdf.cell(130, 8, txt="RETENCAO DE IRT (6,5%):", border=0)
+        pdf.cell(50, 8, txt=f"- {fmt_kz(total_irt)}", border=0, align='R', ln=True)
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(130, 10, txt="VALOR LIQUIDO A RECEBER:", border=0)
+        pdf.cell(50, 10, txt=fmt_kz(total_liquido), border=0, align='R', ln=True)
 
-            pdf_out = pdf.output()
-            st.download_button(
-                label="✅ Descarregar Recibo PDF Final",
-                data=bytes(pdf_out),
-                file_name="Recibo_ISPTLO_Juri.pdf",
-                mime="application/pdf"
-            )
-            st.success("Recibo gerado com sucesso!")
-        else:
-            st.warning("Por favor, selecione um docente ou calcule os haveres primeiro.")
+        # Rodapé Institucional
+        pdf.ln(15)
+        pdf.set_font("Arial", "I", 8)
+        pdf.multi_cell(0, 5, txt="Base Legal: Decreto Presidencial n 191/18 (ECDES) e Lei n 19/14 (C.I.R.T.).")
+        
+        # 3. Gerar os bytes do PDF
+        pdf_bytes = pdf.output()
 
+        # 4. BOTÃO DE DOWNLOAD DIRETO (Este botão não causa erros!)
+        st.download_button(
+            label="📥 Descarregar Recibo PDF Oficial",
+            data=bytes(pdf_bytes),
+            file_name=f"Recibo_ISPTLO_{nome_doc.replace(' ', '_')}.pdf",
+            mime="application/pdf",
+            key="btn_download_final"
+        )
 # ══════════════════════════════════════════════════════════════════════════════
 # MODO TESOURARIA
 # ══════════════════════════════════════════════════════════════════════════════

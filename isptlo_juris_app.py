@@ -344,11 +344,12 @@ if st.session_state.modo == "Docente":
         pdf.set_font("Arial", "I", 8)
         pdf.multi_cell(0, 5, txt="Documento gerado automaticamente pelo Sistema de Gestão de Júris (v3.0). Base legal: D.P. nº 191/18 e Lei nº 19/14.")
         
-        # Gerar o ficheiro para descarga
-        pdf_output = pdf.output(dest='S').encode('latin-1')
+        # Gerar o ficheiro para descarga (Correção Final)
+        pdf_output = pdf.output()
+        
         st.download_button(
             label="Clique aqui para guardar o ficheiro",
-            data=pdf_output,
+            data=bytes(pdf_output),
             file_name="Recibo_ISPTLO_Docente.pdf",
             mime="application/pdf"
         )

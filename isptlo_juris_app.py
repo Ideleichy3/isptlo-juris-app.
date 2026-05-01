@@ -321,41 +321,44 @@ if st.session_state.modo == "Docente":
     if st.button("📥 Gerar e Descarregar Recibo Oficial"):
         from fpdf import FPDF
         
-        # 1. Função auxiliar para formatar Kwanza (Ex: 151.500,00 Kz)
+        # 1. Função auxiliar para formatar Kwanza
         def fmt_kz(valor):
             return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " Kz"
 
-        # 2. Criar o PDF
-        pdf = FPDF()
-        pdf.add_page()
-        
-        # Cabeçalho Institucional
-        pdf.set_font("Arial", "B", 16)
-        pdf.cell(0, 10, txt="INSTITUTO SUPERIOR POLITÉCNICO DO LIBOLO", ln=True, align='C')
-        pdf.set_font("Arial", "B", 12)
-        pdf.cell(0, 10, txt="DIRECÇÃO DE INVESTIGAÇÃO CIENTÍFICA E PÓS-GRADUAÇÃO", ln=True, align='C')
-        pdf.ln(5)
-        pdf.line(10, 32, 200, 32)
-        pdf.ln(5)
-
-        # Identificação do Docente
-        # Nota: Ajuste 'docente_selecionado' se a sua variável tiver outro nome
-        nome_docente = docente_selecionado if 'docente_selecionado' in locals() else "Docente ISPTLO"
-        pdf.set_font("Arial", "B", 11)
-        pdf.cell(0, 10, txt=f"BENEFICIÁRIO: {nome_docente.upper()}", ln=True)
-        pdf.set_font("Arial", "", 10)
-        pdf.cell(0, 7, txt=f"ASSUNTO: Recibo de Honorários por Participação em Júris de TFC", ln=True)
-        pdf.ln(5)
-
-        # 3. TABELA DE DETALHE (O que faltava no anterior)
-        # Assumindo que 'df_filtrado' é a tabela que aparece no seu ecrã
+        # 2. Verificar se a tabela tem dados e calcular totais internamente
+        # Usamos 'df_filtrado' que é a base da sua tabela no ecrã
         if 'df_filtrado' in locals() and not df_filtrado.empty:
+            res_bruto = df_filtrado['Valor Bruto'].sum()
+            res_irt = res_bruto * 0.065
+            res_liquido = res_bruto - res_irt
+            
+            # Criar o PDF profissional
+            pdf = FPDF()
+            pdf.add_page()
+            
+            # Cabeçalho Institucional (Sem acentos para evitar erros de fonte)
+            pdf.set_font("Arial", "B", 16)
+            pdf.cell(0, 10, txt="INSTITUTO SUPERIOR POLITECNICO DO LIBOLO", ln=True, align='C')
+            pdf.set_font("Arial", "B", 12)
+            pdf.cell(0, 10, txt="DIRECCAO DE INVESTIGACAO CIENTIFICA E POS-GRADUACAO", ln=True, align='C')
+            pdf.ln(5)
+            pdf.line(10, 32, 200, 32)
+            pdf.ln(5)
+
+            # Identificação do Docente
+            nome_doc = docente_selecionado if 'docente_selecionado' in locals() else "Docente ISPTLO"
+            pdf.set_font("Arial", "B", 11)
+            pdf.cell(0, 10, txt=f"BENEFICIARIO: {nome_doc.upper()}", ln=True)
+            pdf.set_font("Arial", "", 10)
+            pdf.cell(0, 7, txt="ASSUNTO: Recibo de Honorarios por Participacao em Juris de TFC", ln=True)
+            pdf.ln(5)
+
+            # Tabela de Detalhe (Captura o que está na imagem image_17.png)
             pdf.set_fill_color(31, 56, 100) # Azul ISPTLO
             pdf.set_text_color(255, 255, 255)
             pdf.set_font("Arial", "B", 10)
             
-            # Cabeçalhos da Tabela
-            pdf.cell(90, 8, "Função no Júri", border=1, fill=True)
+            pdf.cell(90, 8, "Funcao no Juri", border=1, fill=True)
             pdf.cell(40, 8, "Tipo", border=1, fill=True)
             pdf.cell(50, 8, "Valor Bruto", border=1, fill=True, align='R')
             pdf.ln()
@@ -369,37 +372,39 @@ if st.session_state.modo == "Docente":
                 pdf.cell(50, 8, fmt_kz(row['Valor Bruto']), border=1, align='R')
                 pdf.ln()
 
-        # 4. RESUMO FINANCEIRO (Cartões coloridos)
-        pdf.ln(10)
-        pdf.set_font("Arial", "B", 11)
-        pdf.cell(130, 8, txt="TOTAL BRUTO MENSAL:", border=0)
-        pdf.cell(50, 8, txt=fmt_kz(total_bruto), border=0, align='R', ln=True)
-        
-        pdf.set_font("Arial", "", 11)
-        pdf.cell(130, 8, txt="RETENÇÃO DE IRT (6,5%):", border=0)
-        pdf.cell(50, 8, txt=f"- {fmt_kz(total_irt)}", border=0, align='R', ln=True)
-        
-        pdf.line(140, pdf.get_y()+2, 190, pdf.get_y()+2)
-        pdf.ln(4)
-        
-        pdf.set_font("Arial", "B", 12)
-        pdf.cell(130, 10, txt="VALOR LÍQUIDO A RECEBER:", border=0)
-        pdf.cell(50, 10, txt=fmt_kz(total_liquido), border=0, align='R', ln=True)
+            # Resumo Financeiro Final
+            pdf.ln(10)
+            pdf.set_font("Arial", "B", 11)
+            pdf.cell(130, 8, txt="TOTAL BRUTO MENSAL:", border=0)
+            pdf.cell(50, 8, txt=fmt_kz(res_bruto), border=0, align='R', ln=True)
+            
+            pdf.set_font("Arial", "", 11)
+            pdf.cell(130, 8, txt="RETENCAO DE IRT (6,5%):", border=0)
+            pdf.cell(50, 8, txt=f"- {fmt_kz(res_irt)}", border=0, align='R', ln=True)
+            
+            pdf.line(140, pdf.get_y()+2, 190, pdf.get_y()+2)
+            pdf.ln(4)
+            
+            pdf.set_font("Arial", "B", 12)
+            pdf.cell(130, 10, txt="VALOR LIQUIDO A RECEBER:", border=0)
+            pdf.cell(50, 10, txt=fmt_kz(res_liquido), border=0, align='R', ln=True)
 
-        # 5. RODAPÉ LEGAL
-        pdf.ln(20)
-        pdf.set_font("Arial", "I", 8)
-        pdf.multi_cell(0, 5, txt="Base Legal: Decreto Presidencial nº 191/18 (ECDES) e Lei nº 19/14 (C.I.R.T.). Documento processado pelo Sistema de Gestão ISPTLO-JURIS v3.0.")
-        
-        # 6. GERAÇÃO DO FICHEIRO
-        pdf_bytes = pdf.output()
-        st.download_button(
-            label="✅ Descarregar Recibo PDF Final",
-            data=bytes(pdf_bytes),
-            file_name=f"Recibo_Juri_{nome_docente.replace(' ', '_')}.pdf",
-            mime="application/pdf"
-        )
-        st.success("Recibo gerado com sucesso! Clique acima para guardar.")
+            # Rodapé Legal
+            pdf.ln(20)
+            pdf.set_font("Arial", "I", 8)
+            pdf.multi_cell(0, 5, txt="Base Legal: Decreto Presidencial n 191/18 (ECDES) e Lei n 19/14 (C.I.R.T.). Documento processado pelo Sistema de Gestao ISPTLO-JURIS v3.0.")
+            
+            # Geração do Ficheiro para Descarga
+            pdf_bytes = pdf.output()
+            st.download_button(
+                label="✅ Descarregar Recibo PDF Final",
+                data=bytes(pdf_bytes),
+                file_name=f"Recibo_Juri_{nome_doc.replace(' ', '_')}.pdf",
+                mime="application/pdf"
+            )
+            st.success("Recibo gerado com sucesso!")
+        else:
+            st.error("Erro: Não foi possível capturar os dados da tabela para o PDF.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

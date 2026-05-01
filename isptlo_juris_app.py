@@ -316,8 +316,43 @@ if st.session_state.modo == "Docente":
         }), use_container_width=True, hide_index=True)
 
     # Export recibo docente
-    if st.button("📥 Descarregar Recibo PDF (em desenvolvimento)"):
-        st.info("Funcionalidade de geração de PDF será activada após configuração da dependência fpdf2.")
+    if st.button("📥 Gerar e Descarregar Recibo PDF"):
+        from fpdf import FPDF
+        
+        # Criar o PDF
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", "B", 16)
+        
+        # Cabeçalho Institucional
+        pdf.cell(200, 10, txt="ISPTLO - Instituto Superior Politécnico do Libolo", ln=True, align='C')
+        pdf.set_font("Arial", "", 12)
+        pdf.cell(200, 10, txt="Comprovativo de Pagamento de Júris de TFC", ln=True, align='C')
+        pdf.ln(10)
+        
+        # Dados do Docente (Exemplo extraído da tabela atual)
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(200, 10, txt=f"Resumo de Atividade - Mês Atual", ln=True)
+        pdf.set_font("Arial", "", 11)
+        pdf.cell(200, 10, txt=f"Total Bruto: {st.session_state.get('total_bruto', '0.00')} Kz", ln=True)
+        pdf.cell(200, 10, txt=f"Retenção IRT (6.5%): {st.session_state.get('total_irt', '0.00')} Kz", ln=True)
+        pdf.set_font("Arial", "B", 11)
+        pdf.cell(200, 10, txt=f"Valor Líquido a Receber: {st.session_state.get('total_liquido', '0.00')} Kz", ln=True)
+        
+        # Base Legal
+        pdf.ln(10)
+        pdf.set_font("Arial", "I", 8)
+        pdf.multi_cell(0, 5, txt="Documento gerado automaticamente pelo Sistema de Gestão de Júris (v3.0). Base legal: D.P. nº 191/18 e Lei nº 19/14.")
+        
+        # Gerar o ficheiro para descarga
+        pdf_output = pdf.output(dest='S').encode('latin-1')
+        st.download_button(
+            label="Clique aqui para guardar o ficheiro",
+            data=pdf_output,
+            file_name="Recibo_ISPTLO_Docente.pdf",
+            mime="application/pdf"
+        )
+        st.success("Recibo gerado com sucesso!")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

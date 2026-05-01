@@ -316,44 +316,39 @@ if st.session_state.modo == "Docente":
         }), use_container_width=True, hide_index=True)
 
   # =========================================================
-    # GENERADOR DE PDF AUTOMATICO (Versión ISPTLO v3.2 - Final)
+    # GERADOR DE PDF UNIVERSAL (Para Todos os Docentes ISPTLO)
     # =========================================================
     
-    # 1. Guardar os dados na memória para o botão não os perder
+    # Este bloco deteta QUEM está selecionado e gera os dados
     if 'df_filtrado' in locals() and not df_filtrado.empty:
-        st.session_state['dados_pdf'] = {
-            'tabela': df_filtrado,
-            'docente': docente_selecionado if 'docente_selecionado' in locals() else "Docente",
-            'bruto': total_bruto,
-            'irt': total_irt,
-            'liquido': total_liquido
-        }
-
-    # 2. Verificar se os dados estão na memória e gerar o PDF
-    if 'dados_pdf' in st.session_state:
         from fpdf import FPDF
         
-        # Função para formatar Kwanza (Ex: 167.500,00 Kz)
+        # 1. Captura dinâmica do nome (funciona para qualquer docente)
+        # Se não houver seleção, ele usa "Docente ISPTLO" como padrão
+        nome_atual = docente_selecionado if 'docente_selecionado' in locals() else "Docente_ISPTLO"
+
         def fmt_kz(valor):
             return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " Kz"
 
-        info = st.session_state['dados_pdf']
+        # 2. Construção do PDF (Memória de Sessão)
         pdf = FPDF()
         pdf.add_page()
         
-        # Cabeçalho Profissional
+        # Cabeçalho Oficial
         pdf.set_font("Arial", "B", 16)
         pdf.cell(0, 10, txt="INSTITUTO SUPERIOR POLITECNICO DO LIBOLO", ln=True, align='C')
-        pdf.set_font("Arial", "B", 12)
-        pdf.cell(0, 8, txt="DIRECCAO DE INVESTIGACAO CIENTIFICA", ln=True, align='C')
+        pdf.set_font("Arial", "B", 11)
+        pdf.cell(0, 8, txt="COMPROVATIVO DE HAVERES - JURIS", ln=True, align='C')
         pdf.ln(10)
 
-        # Beneficiário
+        # Identificação Dinâmica
         pdf.set_font("Arial", "B", 11)
-        pdf.cell(0, 10, txt=f"BENEFICIARIO: {info['docente'].upper()}", ln=True)
+        pdf.cell(0, 10, txt=f"BENEFICIARIO: {nome_atual.upper()}", ln=True)
+        pdf.set_font("Arial", "", 10)
+        pdf.cell(0, 7, txt=f"Data: {pd.to_datetime('today').strftime('%d/%m/%Y')}", ln=True)
         pdf.ln(5)
 
-        # Tabela de Dados
+        # Tabela de Honorários
         pdf.set_fill_color(31, 56, 100)
         pdf.set_text_color(255, 255, 255)
         pdf.set_font("Arial", "B", 10)
@@ -364,29 +359,29 @@ if st.session_state.modo == "Docente":
         
         pdf.set_text_color(0, 0, 0)
         pdf.set_font("Arial", "", 9)
-        for _, row in info['tabela'].iterrows():
+        for _, row in df_filtrado.iterrows():
             pdf.cell(90, 8, str(row['Função']), border=1)
             pdf.cell(40, 8, str(row['Tipo']), border=1)
             pdf.cell(50, 8, fmt_kz(row['Valor Bruto']), border=1, align='R')
             pdf.ln()
 
-        # Totais Finais
+        # Resumo Financeiro
         pdf.ln(10)
         pdf.set_font("Arial", "B", 11)
         pdf.cell(130, 8, txt="TOTAL BRUTO:", border=0)
-        pdf.cell(50, 8, txt=fmt_kz(info['bruto']), border=0, align='R', ln=True)
+        pdf.cell(50, 8, txt=fmt_kz(total_bruto), border=0, align='R', ln=True)
         pdf.set_font("Arial", "B", 12)
+        pdf.set_text_color(0, 100, 0)
         pdf.cell(130, 10, txt="LIQUIDO A RECEBER:", border=0)
-        pdf.cell(50, 10, txt=fmt_kz(info['liquido']), border=0, align='R', ln=True)
+        pdf.cell(50, 10, txt=fmt_kz(total_liquido), border=0, align='R', ln=True)
 
-        # Gerar o botão de descarga
+        # 3. Botão de Download (Este botão aparecerá para TODOS)
         pdf_bytes = pdf.output()
         st.download_button(
-            label="📥 Gerar e Descarregar Recibo Oficial",
+            label=f"📥 Descarregar Recibo ({nome_atual})",
             data=bytes(pdf_bytes),
-            file_name=f"Recibo_{info['docente'].replace(' ', '_')}.pdf",
-            mime="application/pdf",
-            key="btn_final_isptlo"
+            file_name=f"Recibo_ISPTLO_{nome_atual.replace(' ', '_')}.pdf",
+            mime="application/pdf"
         )
 # ══════════════════════════════════════════════════════════════════════════════
 # MODO TESOURARIA

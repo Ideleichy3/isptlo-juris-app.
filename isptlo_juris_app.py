@@ -630,7 +630,19 @@ else:
                 file_name=f"ISPTLO_Juris_Export_{datetime.date.today().strftime('%Y%m%d')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+            
+df_resumo_exp = get_resumo()
+t_bruto = df_resumo_exp["total_bruto"].sum() if not df_resumo_exp.empty else 0
+t_irt   = df_resumo_exp["irt_6_5"].sum()    if not df_resumo_exp.empty else 0
+t_liq   = df_resumo_exp["liquido"].sum()    if not df_resumo_exp.empty else 0
 
+render_tesouraria_pdf_block(
+    mes_filtro    = "Todos",
+    df_resumo     = df_resumo_exp,
+    total_bruto   = t_bruto,
+    total_irt     = t_irt,
+    total_liquido = t_liq,
+)
             # JSON backup
             json_data = json.dumps({
                 "lancamentos": st.session_state.lancamentos,

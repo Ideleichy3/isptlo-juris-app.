@@ -28,7 +28,7 @@ LOGO_SRC  = f"data:image/png;base64,{LOGO_B64}"
 
 # ── CONFIGURAÇÃO DA APP ───────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="ISPTLO — Gestão de Júris de TFC",
+    page_title="ISPTLO — Gestão financeira dos Júris de TFC e Relatórios de Estágio",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -421,7 +421,7 @@ with st.sidebar:
             ILR - Academic Solutions
           </div>
           <div class="ilr-slogan">
-            Gestao Inteligente para Instituicoes de Excelencia
+            Gestão Inteligente para Instituições de Excelência
           </div>
           <div class="ilr-version">
             Versao 3.1 | ISPTLO - TFC/Pagamentos
@@ -983,7 +983,7 @@ st.markdown(
           Ph.D. Ideleichy Lombillo Rivero &nbsp;|&nbsp; ILR - Academic Solutions
         </div>
         <div style="color:#AABBDD;font-size:10px;font-style:italic;margin-top:2px">
-          Gestao Inteligente para Instituicoes de Excelencia
+          Gestão Inteligente para Instituições de Excelência
         </div>
         <div style="color:#7799CC;font-size:9px;margin-top:4px">
           ISPTLO — TFC/Pagamentos v3.1 &nbsp;|&nbsp;

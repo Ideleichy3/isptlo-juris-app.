@@ -317,83 +317,14 @@ if st.session_state.modo == "Docente":
             "funcao":"Função","tipo":"Tipo","bruto_fmt":"Valor Bruto"
         }), use_container_width=True, hide_index=True)
 
-  # =========================================================
-        # SOLUÇÃO DEFINITIVA PDF UNIVERSAL (ISPTLO v3.3 - Blindada)
-        # =========================================================
-        st.markdown("---") 
-        
-        # 1. Verificar se as variáveis necessárias existem
-        if 'df_filtrado' in locals() and not df_filtrado.empty:
-            try:
-                from fpdf import FPDF
-                import datetime
-                
-                # Função de formatação para Angola
-                def fmt_kz(valor):
-                    return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " Kz"
-
-                # Criar PDF
-                pdf = FPDF()
-                pdf.add_page()
-                
-                # Cabeçalho
-                pdf.set_font('Arial', 'B', 15)
-                pdf.cell(0, 10, 'INSTITUTO SUPERIOR POLITECHNICO DO LIBOLO', ln=True, align='C')
-                pdf.set_font('Arial', '', 12)
-                pdf.cell(0, 10, 'COMPROVATIVO DE HAVERES - JURIS', ln=True, align='C')
-                pdf.ln(10)
-
-                # Identificação do Docente (Qualquer um que esteja no ecrã)
-                nome_doc = docente_selecionado if 'docente_selecionado' in locals() else "Docente ISPTLO"
-                pdf.set_font('Arial', 'B', 12)
-                pdf.cell(0, 10, f"DOCENTE BENEFICIARIO: {nome_doc.upper()}", ln=True)
-                pdf.ln(5)
-
-                # Totais (Ex: os 40.000,00 Kz da imagem)
-                pdf.set_font('Arial', 'B', 11)
-                pdf.cell(130, 8, 'TOTAL BRUTO MENSAL:', border=0)
-                pdf.cell(50, 8, fmt_kz(total_bruto), border=0, ln=True, align='R')
-                pdf.cell(130, 8, 'RETENCAO IRT (6,5%):', border=0)
-                pdf.cell(50, 8, f"- {fmt_kz(total_irt)}", border=0, ln=True, align='R')
-                
-                pdf.set_font('Arial', 'B', 12)
-                pdf.cell(130, 10, 'VALOR LIQUIDO A RECEBER:', border=0)
-                pdf.cell(50, 10, fmt_kz(total_liquido), border=0, ln=True, align='R')
-                pdf.ln(10)
-
-                # Tabela de Detalhes
-                pdf.set_font('Arial', 'B', 10)
-                pdf.cell(80, 8, 'Funcao', border=1)
-                pdf.cell(60, 8, 'Tipo', border=1)
-                pdf.cell(40, 8, 'Valor Bruto', border=1, ln=True, align='R')
-                
-                pdf.set_font('Arial', '', 9)
-                for index, row in df_filtrado.iterrows():
-                    pdf.cell(80, 8, str(row['Função']), border=1)
-                    pdf.cell(60, 8, str(row['Tipo']), border=1)
-                    # Tratamento de valor para garantir que é número
-                    v_bruto = row['Valor Bruto']
-                    if isinstance(v_bruto, str):
-                        v_bruto = float(v_bruto.replace('Kz','').replace('.','').replace(',','.').strip())
-                    pdf.cell(40, 8, fmt_kz(v_bruto), border=1, ln=True, align='R')
-
-                # Rodapé
-                pdf.set_y(-20)
-                pdf.set_font('Arial', 'I', 8)
-                pdf.cell(0, 10, f'Gerado em {datetime.datetime.now().strftime("%d/%m/%Y")} | ISPTLO-JURIS', align='C')
-
-                # Gerar botão de download
-                pdf_output = pdf.output(dest='S').encode('latin-1')
-                st.download_button(
-                    label=f"📥 Descarregar Recibo PDF ({nome_doc})",
-                    data=pdf_output,
-                    file_name=f"Recibo_ISPTLO_{nome_doc.replace(' ', '_')}.pdf",
-                    mime="application/pdf",
-                    key=f"download_pdf_{nome_doc}"
-                )
-
-            except Exception as e:
-                st.error(f"Erro ao gerar PDF: {e}")
+  render_docente_pdf_block(
+    docente_name  = docente_sel,
+    mes_ref       = mes_sel,
+    participacoes = participacoes,
+    total_bruto   = total_bruto,
+    total_irt     = irt,
+    total_liquido = liquido,
+)
 # ══════════════════════════════════════════════════════════════════════════════
 # MODO TESOURARIA
 # ══════════════════════════════════════════════════════════════════════════════

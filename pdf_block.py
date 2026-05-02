@@ -9,7 +9,7 @@ PROBLEMA RESOLVIDO:
     df_filtrado, etc.), resultando em PDFs em branco ou NameError.
 
 SOLUÇÃO APLICADA:
-    Padrão "Calcular → Persistir → Descarregar" em dois momentos:
+    Padrão "Calcular -> Persistir -> Descarregar" em dois momentos:
       1. MOMENTO DO CÁLCULO: os dados são guardados em st.session_state.
       2. MOMENTO DO DOWNLOAD: o PDF é gerado lendo de st.session_state
          (os dados estão sempre disponíveis, mesmo após o rerun).
@@ -38,7 +38,7 @@ import io
 def format_kz(value: float) -> str:
     """
     Formata um valor numérico para o padrão contabilístico angolano.
-    Exemplo: 167500.50 → '167.500,50 Kz'
+    Exemplo: 167500.50 -> '167.500,50 Kz'
     """
     if value is None:
         return "0,00 Kz"
@@ -60,24 +60,105 @@ class ISPTLOReportPDF(FPDF):
     Herda de FPDF para permitir cabeçalho e rodapé automáticos.
     """
 
+    @staticmethod
+    def _resolve_font():
+        """
+        Resolve o caminho da fonte DejaVu de forma portátil.
+        Tenta: (1) pasta do repo, (2) /tmp/ com download, (3) None (fallback Helvetica).
+        """
+        import os
+        candidates = [
+            os.path.join(os.path.dirname(__file__), "DejaVuSans.ttf"),
+            os.path.join(os.path.dirname(__file__), "fonts", "DejaVuSans.ttf"),
+            "/tmp/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        ]
+        for path in candidates:
+            if os.path.isfile(path):
+                return path
+        # Último recurso: tentar download (funciona no Streamlit Cloud)
+        try:
+            import urllib.request
+            dest = "/tmp/DejaVuSans.ttf"
+            url  = "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.zip"
+            # Alternativa directa via sourceforge
+            url2 = "https://sourceforge.net/projects/dejavu/files/dejavu/2.37/dejavu-fonts-ttf-2.37.tar.bz2"
+            # Usar fonts.gstatic.com (Google) como CDN fiável
+            url3 = "https://fonts.gstatic.com/s/dejavusans/v1/TEX-0-DejaVu.ttf"
+            urllib.request.urlretrieve(url3, dest)
+            if os.path.isfile(dest) and os.path.getsize(dest) > 10000:
+                return dest
+        except Exception:
+            pass
+        return None  # Cair para Helvetica
+
+    def _get_font_name(self):
+        return getattr(self, "_font_family", "Helvetica")
+
+    def _safe(self, text):
+        """Converte texto para latin-1 seguro (usado quando não há fonte Unicode)."""
+        result = ""
+        for ch in str(text):
+            try:
+                ch.encode("latin-1")
+                result += ch
+            except UnicodeEncodeError:
+                # Mapeamento manual para caracteres portugueses comuns
+                mapping = {
+                    "ã": "a", "õ": "o", "â": "a", "ê": "e", "ô": "o",
+                    "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+                    "à": "a", "è": "e", "ì": "i", "ò": "o", "ù": "u",
+                    "ç": "c", "ñ": "n", "ü": "u",
+                    "Ã": "A", "Õ": "O", "Â": "A", "Ê": "E", "Ô": "O",
+                    "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U",
+                    "À": "A", "È": "E", "Ì": "I", "Ò": "O", "Ù": "U",
+                    "Ç": "C", "Ñ": "N", "Ü": "U",
+                    "—": "-", "–": "-", "’": "'",
+                    "“": '"', "”": '"',
+                }
+                result += mapping.get(ch, "?")
+        return result
+
+    def _c(self, txt):
+        """Shorthand: sanitize text before placing in a cell (Helvetica-safe)."""
+        if self._get_font_name() == "Helvetica":
+            return self._safe(str(txt))
+        return str(txt)
+
     def header(self):
-        # Register Unicode font (first call only)
+        # Registar fonte Unicode na primeira chamada
         if not hasattr(self, "_fonts_registered"):
-            self.add_font("DejaVu",      "",  "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
-            self.add_font("DejaVu",      "B", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
-            self.add_font("DejaVu",      "I", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf")
-            self.add_font("DejaVu",      "BI","/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf")
+            font_path = self._resolve_font()
+            if font_path:
+                try:
+                    bold_path = font_path.replace("DejaVuSans.ttf", "DejaVuSans-Bold.ttf")
+                    obli_path = font_path.replace("DejaVuSans.ttf", "DejaVuSans-Oblique.ttf")
+                    self.add_font("DejaVu", "",   font_path)
+                    if os.path.isfile(bold_path):
+                        self.add_font("DejaVu", "B", bold_path)
+                    else:
+                        self.add_font("DejaVu", "B", font_path)
+                    if os.path.isfile(obli_path):
+                        self.add_font("DejaVu", "I", obli_path)
+                    else:
+                        self.add_font("DejaVu", "I", font_path)
+                    self._font_family = "DejaVu"
+                except Exception:
+                    self._font_family = "Helvetica"
+            else:
+                self._font_family = "Helvetica"
             self._fonts_registered = True
+        font = self._get_font_name()
         # Faixa de cabeçalho azul escuro
         self.set_fill_color(31, 56, 100)        # #1F3864
         self.rect(0, 0, 210, 28, "F")
         # Título principal
-        self.set_font("DejaVu", "B", 13)
+        self.set_font(font, "B", 13)
         self.set_text_color(255, 215, 0)         # Gold
         self.set_xy(10, 6)
         self.cell(190, 7, "REPÚBLICA DE ANGOLA - ISPTLO", align="C")
         # Subtítulo
-        self.set_font("DejaVu", "", 9)
+        self.set_font(self._get_font_name(), "", 9)
         self.set_text_color(204, 221, 255)       # Light blue
         self.set_xy(10, 14)
         self.cell(190, 6, "Instituto Superior Politécnico do Libolo | Mapa de Controlo de Júri de TFC", align="C")
@@ -90,7 +171,7 @@ class ISPTLOReportPDF(FPDF):
         self.set_draw_color(31, 56, 100)
         self.set_line_width(0.4)
         self.line(10, self.get_y(), 200, self.get_y())
-        self.set_font("DejaVu", "I", 7)
+        self.set_font(self._get_font_name(), "I", 7)
         self.set_text_color(120, 120, 120)
         self.cell(
             0, 8,
@@ -103,24 +184,24 @@ class ISPTLOReportPDF(FPDF):
         """Faixa de secção com título."""
         self.set_fill_color(46, 80, 136)         # #2E5088
         self.set_text_color(255, 255, 255)
-        self.set_font("DejaVu", "B", 10)
+        self.set_font(self._get_font_name(), "B", 10)
         self.set_x(10)
-        self.cell(190, 8, f"  {title}", fill=True, ln=True)
+        self.cell(190, 8, self._c(f"  {title}"), fill=True, ln=True)
         self.ln(2)
 
     def meta_row(self, label: str, value: str, highlight: bool = False):
         """Par chave-valor para metadados do documento."""
-        self.set_font("DejaVu", "B", 9)
+        self.set_font(self._get_font_name(), "B", 9)
         self.set_text_color(46, 80, 136)
         self.set_x(10)
-        self.cell(55, 6, label)
-        self.set_font("DejaVu", "", 9)
+        self.cell(55, 6, self._c(label))
+        self.set_font(self._get_font_name(), "", 9)
         self.set_text_color(0, 0, 0)
         if highlight:
             self.set_fill_color(198, 239, 206)   # Green fill
-            self.cell(135, 6, value, fill=True, ln=True)
+            self.cell(135, 6, self._c(value), fill=True, ln=True)
         else:
-            self.cell(135, 6, value, ln=True)
+            self.cell(135, 6, self._c(value), ln=True)
 
     def kpi_block(
         self,
@@ -130,7 +211,7 @@ class ISPTLOReportPDF(FPDF):
     ):
         """Bloco de 3 KPIs lado a lado."""
         self.ln(3)
-        labels  = ["TOTAL BRUTO MENSAL",    "RETENÇÃO IRT (6,5%) → AGT", "VALOR LÍQUIDO A PAGAR"]
+        labels  = ["TOTAL BRUTO MENSAL", "RETENCAO IRT (6,5%) - AGT", "VALOR LIQUIDO A PAGAR"]
         values  = [total_bruto,              total_irt,                    total_liquido]
         r_fills = [(31, 56, 100),            (192, 0, 0),                  (30, 113, 69)]
         r_texts = [(255, 215, 0),            (255, 255, 255),              (255, 255, 255)]
@@ -141,15 +222,15 @@ class ISPTLOReportPDF(FPDF):
             # Label bar
             self.set_fill_color(*fill)
             self.set_text_color(*text)
-            self.set_font("DejaVu", "B", 7)
+            self.set_font(self._get_font_name(), "B", 7)
             self.set_xy(x, self.get_y())
-            self.cell(box_w, 6, lbl, fill=True, align="C")
+            self.cell(box_w, 6, self._c(lbl), fill=True, align="C")
             # Value bar
             self.set_fill_color(240, 240, 240)
             self.set_text_color(0, 0, 0)
-            self.set_font("DejaVu", "B", 10)
+            self.set_font(self._get_font_name(), "B", 10)
             self.set_xy(x, self.get_y() + 6)
-            self.cell(box_w, 9, format_kz(val), fill=True, align="C")
+            self.cell(box_w, 9, self._c(format_kz(val)), fill=True, align="C")
         self.ln(20)
 
     def data_table(self, df: pd.DataFrame, col_widths: list, col_headers: list):
@@ -161,15 +242,15 @@ class ISPTLOReportPDF(FPDF):
         # Header row
         self.set_fill_color(31, 56, 100)
         self.set_text_color(255, 255, 255)
-        self.set_font("DejaVu", "B", 8)
+        self.set_font(self._get_font_name(), "B", 8)
         self.set_x(10)
         for header, width in zip(col_headers, col_widths):
-            self.cell(width, 7, header, border=0, fill=True, align="C")
+            self.cell(width, 7, self._c(header), border=0, fill=True, align="C")
         self.ln()
 
         # Data rows
         self.set_text_color(0, 0, 0)
-        self.set_font("DejaVu", "", 8)
+        self.set_font(self._get_font_name(), "", 8)
         for row_idx, (_, row) in enumerate(df.iterrows()):
             # Zebra fill
             if row_idx % 2 == 0:
@@ -186,13 +267,13 @@ class ISPTLOReportPDF(FPDF):
                 cell_val = str(row[col_name]) if row[col_name] is not None else "-"
                 # Right-align monetary columns (last 3 by convention)
                 align = "R" if col_idx >= len(df.columns) - 3 else "L"
-                self.cell(width, 6, cell_val, border=0, fill=True, align=align)
+                self.cell(width, 6, self._c(cell_val), border=0, fill=True, align=align)
             self.ln()
 
         # Total bar
         self.set_fill_color(31, 56, 100)
         self.set_text_color(255, 255, 255)
-        self.set_font("DejaVu", "B", 8)
+        self.set_font(self._get_font_name(), "B", 8)
         self.set_x(10)
         self.ln(1)
 
@@ -206,10 +287,10 @@ class ISPTLOReportPDF(FPDF):
         self.line(10, y, 10, y + 14)
         self.set_fill_color(255, 242, 204)
         self.rect(10, y, 190, 14, "F")
-        self.set_font("DejaVu", "B", 7)
+        self.set_font(self._get_font_name(), "B", 7)
         self.set_text_color(*color)
         self.set_xy(13, y + 2)
-        self.multi_cell(185, 4.5, text)
+        self.multi_cell(185, 4.5, self._c(text))
         self.ln(3)
 
 
@@ -281,14 +362,14 @@ def generate_docente_pdf(
 
     # ── Cálculo detalhado do IRT ──────────────────────────────────────────────
     pdf.section_title("CÁLCULO DE RETENÇÃO NA FONTE (IRT)")
-    pdf.set_font("DejaVu", "", 9)
+    pdf.set_font(pdf._get_font_name(), "", 9)
     pdf.set_text_color(0, 0, 0)
     pdf.set_x(10)
     pdf.multi_cell(
         190, 5.5,
-        f"Total Bruto Mensal Acumulado:  {format_kz(total_bruto)}\n"
-        f"Retenção IRT (6,5% × {format_kz(total_bruto)}):  {format_kz(total_irt)}\n"
-        f"Valor Líquido a Transferir:  {format_kz(total_liquido)}"
+        f"Total Bruto Mensal Acumulado: {format_kz(total_bruto)}\n"
+        f"Retencao IRT (6.5%): {format_kz(total_irt)}\n"
+        f"Valor Liquido a Transferir: {format_kz(total_liquido)}"
     )
     pdf.ln(2)
 
@@ -301,7 +382,7 @@ def generate_docente_pdf(
 
     # ── Assinaturas ───────────────────────────────────────────────────────────
     pdf.ln(8)
-    pdf.set_font("DejaVu", "", 9)
+    pdf.set_font(pdf._get_font_name(), "", 9)
     pdf.set_text_color(0, 0, 0)
     sig_y = pdf.get_y()
     # Left: docente
@@ -391,7 +472,7 @@ def generate_tesouraria_pdf(
 # ═══════════════════════════════════════════════════════════════════════════════
 # 4. BLOCO A INSERIR NO MÓDULO DOCENTE
 #    Localização no código original:
-#    → logo após o cálculo de `total_bruto`, `irt`, `liquido` e a exibição das KPIs
+#    -> logo após o cálculo de `total_bruto`, `irt`, `liquido` e a exibição das KPIs
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def render_docente_pdf_block(
@@ -457,7 +538,7 @@ def render_docente_pdf_block(
 # ═══════════════════════════════════════════════════════════════════════════════
 # 5. BLOCO A INSERIR NO MÓDULO TESOURARIA (Dashboard / Exportar)
 #    Localização no código original:
-#    → na secção "📥 Exportar Excel / PDF", logo após a geração do Excel
+#    -> na secção "📥 Exportar Excel / PDF", logo após a geração do Excel
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def render_tesouraria_pdf_block(
@@ -506,7 +587,7 @@ def render_tesouraria_pdf_block(
         filename = f"ISPTLO_Relatorio_Juris_{mes_safe}_{datetime.date.today().strftime('%Y%m%d')}.pdf"
 
         st.download_button(
-            label    = "📊 Descarregar Relatório Executivo PDF",
+            label    = " Descarregar Relatório Executivo PDF",
             data     = pdf_bytes,
             file_name= filename,
             mime     = "application/pdf",
@@ -517,7 +598,7 @@ def render_tesouraria_pdf_block(
         st.markdown("""
         <div style='background:#C6EFCE;border-left:4px solid #1E7145;
                     padding:0.6rem 1rem;border-radius:6px;font-size:13px;color:#0A3D1F;margin-top:6px'>
-        ✅ <strong>PDF gerado correctamente.</strong>
+         <strong>PDF gerado correctamente.</strong>
         O IRT foi calculado sobre o total mensal por docente (não por sessão)
         conforme exige o <strong>C.I.R.T. Art.º 67</strong>.
         </div>""", unsafe_allow_html=True)
@@ -536,7 +617,7 @@ def render_tesouraria_pdf_block(
 #
 #   # ... mostrar as KPIs com st.markdown(...) ...
 #
-#   # ✅ SUBSTITUIR o bloco antigo de PDF por esta chamada:
+#   #  SUBSTITUIR o bloco antigo de PDF por esta chamada:
 #   from pdf_block import render_docente_pdf_block
 #   render_docente_pdf_block(
 #       docente_name  = docente_sel,        # variável local existente
@@ -555,7 +636,7 @@ def render_tesouraria_pdf_block(
 #   total_irt   = df_resumo["irt_6_5"].sum()    if not df_resumo.empty else 0
 #   total_liq   = df_resumo["liquido"].sum()    if not df_resumo.empty else 0
 #
-#   # ✅ SUBSTITUIR o bloco antigo de PDF por esta chamada:
+#   #  SUBSTITUIR o bloco antigo de PDF por esta chamada:
 #   from pdf_block import render_tesouraria_pdf_block
 #   render_tesouraria_pdf_block(
 #       mes_filtro    = mes_filtro,         # variável de filtro existente

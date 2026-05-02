@@ -11,6 +11,7 @@ Execução:
 Acesso mobile: abrir o URL no browser do telemóvel (mesma rede Wi-Fi)
 """
 
+from pdf_block import render_docente_pdf_block, render_tesouraria_pdf_block
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -20,6 +21,7 @@ import datetime
 import io
 import json
 from pathlib import Path
+
 
 # ── CONFIGURAÇÃO DA APP ───────────────────────────────────────────────────────
 st.set_page_config(

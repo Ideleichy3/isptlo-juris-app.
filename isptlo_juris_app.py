@@ -315,7 +315,7 @@ with st.sidebar:
           <img src="{LOGO_SRC}" alt="ISPTLO Logo"/>
           <div class="logo-sidebar-text">
             <h3>ISPTLO</h3>
-            <p>Gestão de Júri de TFC</p>
+            <p>Gestão financeira de Júri de TFC</p>
           </div>
         </div>''',
         unsafe_allow_html=True,
@@ -424,7 +424,7 @@ with st.sidebar:
             Gestão Inteligente para Instituições de Excelência
           </div>
           <div class="ilr-version">
-            Versao 3.1 | ISPTLO - TFC/Pagamentos
+            Versão 3.1 | ISPTLO - TFC/Pagamentos
           </div>
         </div>''',
         unsafe_allow_html=True,

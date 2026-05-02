@@ -161,6 +161,54 @@ st.markdown("""
     .stSelectbox > div > div   { border: 1.5px solid #BDD7EE !important; }
     .stNumberInput > div > div { border: 1.5px solid #FFD700 !important; }
 
+    /* Nav buttons mobile */
+    .nav-row {
+        display: flex; gap: 8px; justify-content: space-between;
+        margin: 0.8rem 0 0.4rem 0;
+    }
+    .nav-btn {
+        flex: 1; padding: 8px 4px; background: #1F3864; color: #FFD700 !important;
+        border: 1px solid #FFD700; border-radius: 8px; font-size: 13px;
+        font-weight: 600; text-align: center; cursor: pointer;
+    }
+    .nav-btn:disabled { background: #555; color: #999 !important; border-color: #555; }
+
+    /* ILR brand footer in sidebar */
+    .ilr-brand {
+        background: linear-gradient(135deg, #0D1B3E 0%, #1F3864 100%);
+        border-top: 2px solid #FFD700; border-radius: 0 0 8px 8px;
+        padding: 0.75rem 0.6rem; margin-top: 0.5rem; text-align: center;
+    }
+    .ilr-brand .ilr-name {
+        color: #FFD700; font-size: 11px; font-weight: 700;
+        line-height: 1.4; margin-bottom: 2px;
+    }
+    .ilr-brand .ilr-slogan {
+        color: #AABBDD; font-size: 9px; font-style: italic;
+    }
+    .ilr-brand .ilr-version {
+        color: #7799CC; font-size: 9px; margin-top: 3px;
+    }
+
+    /* Admin badge */
+    .admin-badge {
+        display: inline-block; background: #C00000; color: white;
+        font-size: 10px; font-weight: 700; padding: 2px 8px;
+        border-radius: 10px; margin-left: 6px; vertical-align: middle;
+    }
+
+    /* Step indicator */
+    .step-indicator {
+        display: flex; justify-content: center; gap: 6px;
+        margin: 0.4rem 0 1rem 0;
+    }
+    .step-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #BDD7EE; display: inline-block;
+    }
+    .step-dot.active { background: #FFD700; transform: scale(1.3); }
+    .step-dot.done   { background: #1E7145; }
+
     /* Logo em fundo de sidebar */
     .logo-sidebar {
         display: flex; align-items: center; gap: 12px;
@@ -209,6 +257,10 @@ if "pagamentos" not in st.session_state:
     st.session_state.pagamentos = {}
 if "modo" not in st.session_state:
     st.session_state.modo = "Tesouraria"
+if "pagina_idx" not in st.session_state:
+    st.session_state.pagina_idx = 0
+if "admin_mode" not in st.session_state:
+    st.session_state.admin_mode = False
 
 # ── FUNÇÕES UTILITÁRIAS ───────────────────────────────────────────────────────
 def kz(val):
@@ -278,18 +330,78 @@ with st.sidebar:
     st.session_state.modo = "Docente" if "Docente" in modo else "Tesouraria"
 
     st.markdown("---")
-    st.markdown("**Navegação**")
+
+    # ── Navegação com tracking de índice ──────────────────────────────────────
     if st.session_state.modo == "Docente":
-        pagina = st.selectbox("Secção", ["💰 Calcular os meus haveres"])
+        PAGINAS_DOC = ["💰 Calcular os meus haveres"]
+        pagina = st.selectbox("Secção", PAGINAS_DOC,
+                              index=0, key="sel_docente")
     else:
-        pagina = st.selectbox("Secção", [
-            "📊 Dashboard Executivo",
-            "➕ Registar Lançamento",
-            "🧾 Resumo IRT por Docente",
-            "💳 Registar Pagamento",
-            "📋 Todos os Lançamentos",
-            "📥 Exportar Excel / PDF",
-        ])
+        # ORDEM LÓGICA: Lançamento primeiro (bloqueante), depois consulta/export
+        PAGINAS_TES = [
+            "➕ 1. Registar Lançamento",
+            "📊 2. Dashboard Executivo",
+            "🧾 3. Resumo IRT por Docente",
+            "💳 4. Registar Pagamento",
+            "📋 5. Todos os Lançamentos",
+            "📥 6. Exportar Relatórios",
+        ]
+        # Sync selectbox ↔ session_state index
+        if st.session_state.pagina_idx >= len(PAGINAS_TES):
+            st.session_state.pagina_idx = 0
+        pagina = st.selectbox(
+            "Secção", PAGINAS_TES,
+            index=st.session_state.pagina_idx,
+            key="sel_tesouraria",
+        )
+        st.session_state.pagina_idx = PAGINAS_TES.index(pagina)
+
+        # Step indicator dots
+        dots_html = "<div class='step-indicator'>"
+        for i in range(len(PAGINAS_TES)):
+            cls = "active" if i == st.session_state.pagina_idx else (
+                  "done" if i < st.session_state.pagina_idx else "step-dot")
+            dots_html += f"<span class='step-dot {cls}'></span>"
+        dots_html += "</div>"
+        st.markdown(dots_html, unsafe_allow_html=True)
+
+        # Mobile nav buttons: Anterior / Próximo
+        c_prev, c_next = st.columns(2)
+        with c_prev:
+            if st.button("◀ Anterior", key="btn_prev",
+                         disabled=(st.session_state.pagina_idx == 0),
+                         use_container_width=True):
+                st.session_state.pagina_idx -= 1
+                st.rerun()
+        with c_next:
+            if st.button("Próximo ▶", key="btn_next",
+                         disabled=(st.session_state.pagina_idx == len(PAGINAS_TES)-1),
+                         use_container_width=True):
+                st.session_state.pagina_idx += 1
+                st.rerun()
+        if st.button("🏠 Início", key="btn_home", use_container_width=True):
+            st.session_state.pagina_idx = 0
+            st.rerun()
+
+    st.markdown("---")
+
+    # ── Acesso Admin (oculto, via password) ───────────────────────────────────
+    with st.expander("🔐 Acesso Admin", expanded=False):
+        pwd = st.text_input("Password", type="password", key="admin_pwd",
+                            label_visibility="collapsed",
+                            placeholder="Password de administrador")
+        if st.button("Entrar", key="btn_admin_login"):
+            if pwd == "ILR2026@ISPTLO":   # alterar conforme necessário
+                st.session_state.admin_mode = True
+                st.success("Modo Admin activado")
+            else:
+                st.session_state.admin_mode = False
+                st.error("Password incorrecta")
+        if st.session_state.admin_mode:
+            st.markdown("🔓 **Admin activo**", unsafe_allow_html=True)
+            if st.button("Sair do Admin", key="btn_admin_logout"):
+                st.session_state.admin_mode = False
+                st.rerun()
 
     st.markdown("---")
     st.markdown(
@@ -298,6 +410,23 @@ with st.sidebar:
         "IRT: Lei nº 19/14 (C.I.R.T.) Art.º 67<br>"
         "Ofício 009/25 + Emenda DASG 023/2025"
         "</small>",
+        unsafe_allow_html=True,
+    )
+
+    # ── ILR Brand block (base da sidebar) ─────────────────────────────────────
+    st.markdown(
+        f'''<div class="ilr-brand">
+          <div class="ilr-name">
+            Ph.D. Ideleichy Lombillo Rivero<br>
+            ILR - Academic Solutions
+          </div>
+          <div class="ilr-slogan">
+            Gestao Inteligente para Instituicoes de Excelencia
+          </div>
+          <div class="ilr-version">
+            Versao 3.1 | ISPTLO - TFC/Pagamentos
+          </div>
+        </div>''',
         unsafe_allow_html=True,
     )
 
@@ -426,7 +555,7 @@ if st.session_state.modo == "Docente":
 else:
 
     # ── Dashboard Executivo ───────────────────────────────────────────────────
-    if pagina == "📊 Dashboard Executivo":
+    if pagina == "📊 2. Dashboard Executivo":
         df     = get_lancamentos_df()
         resumo = get_resumo()
 
@@ -523,7 +652,7 @@ else:
             )
 
     # ── Registar Lançamento ───────────────────────────────────────────────────
-    elif pagina == "➕ Registar Lançamento":
+    elif pagina == "➕ 1. Registar Lançamento":
         st.markdown(
             '<div class="section-title">➕ Registar Novo Lançamento (por sessão)</div>',
             unsafe_allow_html=True,
@@ -601,7 +730,7 @@ else:
                     st.rerun()
 
     # ── Resumo IRT ────────────────────────────────────────────────────────────
-    elif pagina == "🧾 Resumo IRT por Docente":
+    elif pagina == "🧾 3. Resumo IRT por Docente":
         st.markdown(
             '<div class="section-title">🧾 Resumo IRT — Cálculo Mensal por Docente</div>',
             unsafe_allow_html=True,
@@ -666,7 +795,7 @@ else:
             )
 
     # ── Registar Pagamento ────────────────────────────────────────────────────
-    elif pagina == "💳 Registar Pagamento":
+    elif pagina == "💳 4. Registar Pagamento":
         st.markdown(
             '<div class="section-title">💳 Registar Pagamento Efectuado</div>',
             unsafe_allow_html=True,
@@ -721,7 +850,7 @@ else:
                         st.rerun()
 
     # ── Todos os Lançamentos ──────────────────────────────────────────────────
-    elif pagina == "📋 Todos os Lançamentos":
+    elif pagina == "📋 5. Todos os Lançamentos":
         st.markdown(
             '<div class="section-title">📋 Todos os Lançamentos Registados</div>',
             unsafe_allow_html=True,
@@ -763,7 +892,7 @@ else:
                 st.rerun()
 
     # ── Exportar Excel / PDF ──────────────────────────────────────────────────
-    elif pagina == "📥 Exportar Excel / PDF":
+    elif pagina == "📥 6. Exportar Relatórios":
         st.markdown(
             '<div class="section-title">📥 Exportar Relatórios</div>',
             unsafe_allow_html=True,
@@ -808,22 +937,28 @@ else:
                 total_liquido = t_liq,
             )
 
-            # ── JSON Backup ───────────────────────────────────────────────────
-            json_data = json.dumps(
-                {
-                    "lancamentos":  st.session_state.lancamentos,
-                    "pagamentos":   st.session_state.pagamentos,
-                    "exportado_em": TODAY,
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-            st.download_button(
-                label="💾 Descarregar Backup JSON",
-                data=json_data.encode("utf-8"),
-                file_name=f"ISPTLO_backup_{datetime.date.today().strftime('%Y%m%d')}.json",
-                mime="application/json",
-            )
+            # ── JSON Backup (apenas Admin) ─────────────────────────────────────
+            if st.session_state.admin_mode:
+                json_data = json.dumps(
+                    {
+                        "lancamentos":  st.session_state.lancamentos,
+                        "pagamentos":   st.session_state.pagamentos,
+                        "exportado_em": TODAY,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                st.markdown(
+                    "<div class='alert-error'>🔒 <strong>Ficheiro de Admin</strong>"
+                    " — uso restrito.</div>",
+                    unsafe_allow_html=True,
+                )
+                st.download_button(
+                    label="💾 Backup JSON (Admin)",
+                    data=json_data.encode("utf-8"),
+                    file_name=f"ISPTLO_backup_{datetime.date.today().strftime('%Y%m%d')}.json",
+                    mime="application/json",
+                )
 
             st.markdown("""
             <div class="alert-legal">
@@ -833,13 +968,31 @@ else:
             • Importe este ficheiro no Mapa de Controlo v3.0 para manter o histórico completo.
             </div>""", unsafe_allow_html=True)
 
-# ── FOOTER ────────────────────────────────────────────────────────────────────
+# ── FOOTER ILR ───────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown(
-    f'''<div style="display:flex;align-items:center;gap:10px;opacity:0.7">
-      <img src="{LOGO_SRC}" style="width:28px;height:28px;border-radius:50%;border:1px solid #1F3864"/>
-      <small style="color:#888">ISPTLO — Mapa de Controlo de Júri de TFC v3.0 |
-      D.P. nº 191/18 (ECDES) | C.I.R.T. Lei nº 19/14 | Ofício 009/25 + Emenda DASG 023/2025</small>
+    f'''<div style="display:flex;align-items:center;gap:14px;
+                   background:linear-gradient(135deg,#0D1B3E,#1F3864);
+                   border-radius:10px;padding:0.8rem 1.2rem;
+                   border-top:2px solid #FFD700;">
+      <img src="{LOGO_SRC}"
+           style="width:40px;height:40px;border-radius:50%;
+                  border:2px solid #FFD700;flex-shrink:0"/>
+      <div style="flex:1">
+        <div style="color:#FFD700;font-size:13px;font-weight:700;line-height:1.3">
+          Ph.D. Ideleichy Lombillo Rivero &nbsp;|&nbsp; ILR - Academic Solutions
+        </div>
+        <div style="color:#AABBDD;font-size:10px;font-style:italic;margin-top:2px">
+          Gestao Inteligente para Instituicoes de Excelencia
+        </div>
+        <div style="color:#7799CC;font-size:9px;margin-top:4px">
+          ISPTLO — TFC/Pagamentos v3.1 &nbsp;|&nbsp;
+          D.P. no 191/18 (ECDES) &nbsp;|&nbsp;
+          C.I.R.T. Lei no 19/14 &nbsp;|&nbsp;
+          Oficio 009/25 + Emenda DASG 023/2025
+        </div>
+      </div>
+      {'<span class="admin-badge">ADMIN</span>' if st.session_state.get("admin_mode") else ""}
     </div>''',
     unsafe_allow_html=True,
 )

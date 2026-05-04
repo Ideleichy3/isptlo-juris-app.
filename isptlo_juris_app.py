@@ -424,9 +424,6 @@ def check_duplicate(despacho: str, docente: str) -> bool:
     df = get_lancamentos_df()
     if df.empty:
         return False
-    
-    # 1. Asegúrate de que el 'return' tenga 4 espacios de sangría (o un TAB)
-    # 2. Usa 'docente' (que es el nombre que pusiste arriba en los paréntesis)
     return not df[(df["despacho"] == despacho) & (df["docente"] == docente)].empty
 
 

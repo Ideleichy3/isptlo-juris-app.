@@ -424,7 +424,7 @@ def check_duplicate(despacho: str, docente: str) -> bool:
     df = get_lancamentos_df()
     if df.empty:
         return False
-    return not df[(df["despacho"] == despacho) & (df["docente"] == docente)].empty
+    return not df[(df["despacho"] == despacho) & (df["docente"] == docente_selecionado].iloc[0]].empty
 
 
 # ── CSS ───────────────────────────────────────────────────────────────────────

@@ -58,67 +58,105 @@ SUBSIDIOS_DEFAULT = {
 }
 
 MEMBERS_DEFAULT = [
-    {"Nome": "Manuel Octávio Isaac Spínola",  "Grau": "PhD",    "Cargo": "Presidente do ISPTLO",
-     "Departamento": "Agronomia / Engenharias e Tecnologias"},
-    {"Nome": "Ideleichy Lombillo Rivero",     "Grau": "PhD",    "Cargo": "Prof. Catedrática e Investigadora",
-     "Departamento": "Todos os Cursos"},
-    {"Nome": "Elizabeth González",            "Grau": "MSc",    "Cargo": "Vice-Presidente Académica",
+    # ── PhD ───────────────────────────────────────────────────────────────────
+    {"Nome": "Manuel Octávio Isaac Spínola",
+     "Grau": "PhD", "Cargo": "Presidente do ISPTLO",
+     "Departamento": "Todas as áreas"},
+    {"Nome": "Ideleichy Lombillo Rivero",
+     "Grau": "PhD", "Cargo": "Professora Catedrática | Vice-Presidência Científica",
+     "Departamento": "Todas as áreas"},
+    {"Nome": "Anacleto Monteiro",
+     "Grau": "PhD", "Cargo": "Docente Externo",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Domingos Lunga",                "Grau": "MSc",    "Cargo": "Vice-Presidente Científica.",
-     "Departamento": "Ensino Primário e Contabilidade e Gestão / CSH"},
-    {"Nome": "José Fernando Manuel",          "Grau": "MSc",    "Cargo": "Docente",
+
+    # ── MSc / Mestre ──────────────────────────────────────────────────────────
+    {"Nome": "Elizabeth González",
+     "Grau": "MSc", "Cargo": "Vice-Presidente Académica | Professora Auxiliar",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Walquiria Chissimo",            "Grau": "MSc",    "Cargo": "Chefe do Dpto RH-AS",
+    {"Nome": "Domingos Lunga",
+     "Grau": "MSc", "Cargo": "Vice-Presidente Científico | Professor Auxiliar",
      "Departamento": "Contabilidade e Gestão / CSH"},
-    {"Nome": "Félix Palau",                   "Grau": "MSc",    "Cargo": "Chefe do DEI",
+    {"Nome": "José Fernando Manuel",
+     "Grau": "MSc", "Cargo": "Professor Assistente",
+     "Departamento": "Ensino Primário / CSH"},
+    {"Nome": "Walquiria Chissimo",
+     "Grau": "MSc", "Cargo": "Chefe do Dpto RH-AS | Professora Assistente",
+     "Departamento": "Contabilidade e Gestão / CSH"},
+    {"Nome": "Félix Palau",
+     "Grau": "MSc", "Cargo": "Chefe do DEI | Professor Assistente",
      "Departamento": "Agronomia / Engenharias e Tecnologias"},
-    {"Nome": "Bernardo Neto",               "Grau": "Lic",    "Cargo": "Chefe do DEI",
+    {"Nome": "Emilio Pedro",
+     "Grau": "MSc", "Cargo": "Docente Externo",
+     "Departamento": "Ensino Primário / CSH"},
+    {"Nome": "Adelino Balança",
+     "Grau": "MSc", "Cargo": "Docente Externo",
+     "Departamento": "Contabilidade e Gestão / CSH"},
+    {"Nome": "Fernando António Manuel",
+     "Grau": "MSc", "Cargo": "Docente Externo",
+     "Departamento": "Agronomia / Engenharias e Tecnologias"},
+    {"Nome": "Helena Várzea",
+     "Grau": "MSc", "Cargo": "Docente Externa",
+     "Departamento": "Ensino Primário / CSH"},
+    {"Nome": "Pedro Kavela",
+     "Grau": "MSc", "Cargo": "Docente Externo",
+     "Departamento": "Contabilidade e Gestão / CSH"},
+    {"Nome": "Loia Alexandre",
+     "Grau": "MSc", "Cargo": "Docente Externo",
+     "Departamento": "Contabilidade e Gestão / CSH"},
+
+    # ── Licenciados ───────────────────────────────────────────────────────────
+    {"Nome": "Marilda Augusto",
+     "Grau": "Lic", "Cargo": "Chefe do Gabinete da Presidência | Prof. Assistente Estagiária",
+     "Departamento": "Ensino Primário / CSH"},
+    {"Nome": "José Monteiro Manuel",
+     "Grau": "Lic", "Cargo": "Professor Assistente",
+     "Departamento": "Ensino Primário / CSH"},
+    {"Nome": "Domingos Ngando",
+     "Grau": "Lic", "Cargo": "Professor Assistente",
+     "Departamento": "Ensino Primário / CSH"},
+    {"Nome": "Bernardo Neto",
+     "Grau": "Lic", "Cargo": "Chefe do DEI | Enfermagem",
      "Departamento": "Enfermagem / Ciências da Saúde"},
-    {"Nome": "Anira Paulino",                 "Grau": "Lic",    "Cargo": "Docente",
+    {"Nome": "Anira Paulino",
+     "Grau": "Lic", "Cargo": "Docente",
      "Departamento": "Contabilidade e Gestão / CSH"},
-    {"Nome": "Domingos Ngando",               "Grau": "Lic",    "Cargo": "Docente",
+    {"Nome": "Elisio Duque",
+     "Grau": "Lic", "Cargo": "Chefe do DEI",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Anacleto Monteiro",  "Grau": "PhD",    "Cargo": "Docente externo",
+    {"Nome": "Fernando João Manuel",
+     "Grau": "Lic", "Cargo": "Chefe do DAAC",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Elisio Duque",     "Grau": "Lic",    "Cargo": "Chefe do DEI",
+    {"Nome": "Yolanda Quitoco",
+     "Grau": "Lic", "Cargo": "Gabinete Psicopedagógico",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Marilda Augusto",            "Grau": "Lic",    "Cargo": "Chefe do G. da Presidência",
+    {"Nome": "David Carruagem",
+     "Grau": "Lic", "Cargo": "Chefe do ASG",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "José Monteiro Manuel",                "Grau": "Lic",    "Cargo": "Docente",
+    {"Nome": "Sebastián Prata",
+     "Grau": "Lic", "Cargo": "Docente",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Fernando João Manuel",          "Grau": "Lic",    "Cargo": "Chefe do DAAC",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Valdim Seferino",            "Grau": "Eng",    "Cargo": "Chefe do Dpto Qualidade",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Yolanda Quitoco",                   "Grau": "Lic",    "Cargo": " G.Psicopedagógico",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "David Carruagem",               "Grau": "Lic",    "Cargo": "Chefe do ASG",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Sebastián Prata",                 "Grau": "Lic",    "Cargo": "Docente",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Ladislau Pedro",               "Grau": "Lic",    "Cargo": "Coord do CLadislau Pedrourso",
+    {"Nome": "Ladislau Pedro",
+     "Grau": "Lic", "Cargo": "Coordenador do Curso",
      "Departamento": "Contabilidade e Gestão / CSH"},
-    {"Nome": "António Carlos",  "Grau": "Lic",    "Cargo": "Docente Externo",
+    {"Nome": "António Carlos",
+     "Grau": "Lic", "Cargo": "Docente Externo",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Alberto Quipuco",     "Grau": "Lic",    "Cargo": "Docente Externo",
+    {"Nome": "Alberto Quipuco",
+     "Grau": "Lic", "Cargo": "Docente Externo",
      "Departamento": "Agronomia / Engenharias e Tecnologias"},
-    {"Nome": "Sidónio Quisonguela",            "Grau": "Lic",    "Cargo": "Docente",
+    {"Nome": "Sidónio Quisonguela",
+     "Grau": "Lic", "Cargo": "Docente",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Emilio Pedro",                "Grau": "MSc",    "Cargo": "Docente Externo",
+    {"Nome": "Tomás Carriengue",
+     "Grau": "Lic", "Cargo": "Docente Externo",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Adelino Balança",          "Grau": "MSc",    "Cargo": "Docente Externo",
+    {"Nome": "Kelson Ferreira",
+     "Grau": "Lic", "Cargo": "Docente Externo",
      "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Fernando António Manuel",            "Grau": "MSc",    "Cargo": "Docente Externo",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Tomás Carriengue",            "Grau": "Lic",    "Cargo": "Docente Externo",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Helena Várzea",                "Grau": "MSc",    "Cargo": "Docente Externo",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Pedro Kavela",          "Grau": "MSc",    "Cargo": "Docente Externo",
-     "Departamento": "Ensino Primário / CSH"},
-    {"Nome": "Loia Alexadre",            "Grau": "MSc",    "Cargo": "Docente Externo",
-     "Departamento": "Contabilidade e Gestão / CSH"},
-      {"Nome": "Kelson Ferreira",            "Grau": "Lic",    "Cargo": "Docente Externo",
+
+    # ── Especialista / Eng ────────────────────────────────────────────────────
+    {"Nome": "Valdim Seferino",
+     "Grau": "Eng", "Cargo": "Chefe do Dpto Qualidade | Especialista",
      "Departamento": "Ensino Primário / CSH"},
 ]
 
@@ -152,54 +190,101 @@ MESES_PT  = {"Jan":"Jan","Feb":"Fev","Mar":"Mar","Apr":"Abr","May":"Mai",
              "Jun":"Jun","Jul":"Jul","Aug":"Ago","Sep":"Set","Oct":"Out",
              "Nov":"Nov","Dec":"Dez"}
 
-# ── GOOGLE SHEETS — CARREGAMENTO DINÂMICO ─────────────────────────────────────
-@st.cache_data(ttl=300, show_spinner=False)
-def load_sheet(sheet_name: str) -> pd.DataFrame | None:
-    """
-    Carrega uma aba do Google Sheet via CSV público.
-    Retorna None se não acessível — app usa defaults.
-    NOTA: O Google Sheet deve estar partilhado como 'Qualquer pessoa com o link pode ver'.
-    """
-    url = (
-        f"https://docs.google.com/spreadsheets/d/{SHEET_ID}"
-        f"/gviz/tq?tqx=out:csv&sheet={sheet_name}"
-    )
-    try:
-        resp = requests.get(url, timeout=8)
-        if resp.status_code == 200 and len(resp.content) > 50:
-            df = pd.read_csv(io.StringIO(resp.text))
-            df = df.dropna(how="all")
-            return df
-    except Exception:
-        pass
+# Mapeamento: nome simples → variantes de nome da aba no Google Sheets
+_SHEET_ALIASES = {
+    "MEMBROS_JURI":    ["MEMBROS_JURI", "👥 MEMBROS_JÚRI",  "MEMBROS_JÚRI",  "MEMBROS JURI"],
+    "LANCAMENTOS":     ["LANCAMENTOS",  "💰 LANÇAMENTOS",   "LANÇAMENTOS",   "LANCAMENTOS"],
+    "TABELA_SUBSIDIOS":["TABELA_SUBSIDIOS","📘 TABELA_SUBSÍDIOS","TABELA_SUBSÍDIOS"],
+    "RESUMO_IRT":      ["RESUMO_IRT",   "🧾 RESUMO_IRT"],
+}
+
+def _fetch_sheet_url(sheet_name: str) -> pd.DataFrame | None:
+    """Tenta todas as variantes do nome da aba até obter resposta."""
+    aliases = _SHEET_ALIASES.get(sheet_name, [sheet_name])
+    for alias in aliases:
+        for url_pattern in [
+            # gviz/tq — mais fiável para CSV público
+            f"https://docs.google.com/spreadsheets/d/{SHEET_ID}"
+            f"/gviz/tq?tqx=out:csv&sheet={requests.utils.quote(alias)}",
+            # export directo
+            f"https://docs.google.com/spreadsheets/d/{SHEET_ID}"
+            f"/export?format=csv&sheet={requests.utils.quote(alias)}",
+        ]:
+            try:
+                resp = requests.get(url_pattern, timeout=8)
+                if resp.status_code == 200 and len(resp.content) > 100:
+                    df = pd.read_csv(io.StringIO(resp.text))
+                    df = df.dropna(how="all")
+                    if not df.empty:
+                        return df
+            except Exception:
+                continue
     return None
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=180, show_spinner=False)   # cache de 3 min (era 5 min)
+def load_sheet(sheet_name: str) -> pd.DataFrame | None:
+    """Versão com cache — usada para leituras normais."""
+    return _fetch_sheet_url(sheet_name)
+
+
+@st.cache_data(ttl=180, show_spinner=False)
 def load_members() -> list[dict]:
-    """Carrega membros da aba MEMBROS_JÚRI. Fallback para lista interna."""
+    """Carrega membros da aba MEMBROS_JÚRI. Fallback para MEMBERS_DEFAULT."""
     df = load_sheet("MEMBROS_JURI")
     if df is not None and not df.empty:
-        cols_needed = ["Nome", "Grau", "Cargo", "Departamento"]
-        available   = [c for c in cols_needed if c in df.columns]
-        if "Nome" in available and "Grau" in available:
-            return df[available].fillna("").to_dict("records")
+        # Procura colunas com nomes flexíveis
+        col_nome  = next((c for c in df.columns if "nome" in c.lower()), None)
+        col_grau  = next((c for c in df.columns if "título" in c.lower()
+                          or "grau"  in c.lower() or "titulo" in c.lower()), None)
+        col_cargo = next((c for c in df.columns if "catego" in c.lower()
+                          or "cargo" in c.lower()), None)
+        col_dept  = next((c for c in df.columns if "depart" in c.lower()
+                          or "curso" in c.lower()), None)
+        if col_nome and col_grau:
+            records = []
+            for _, row in df.iterrows():
+                nome = str(row.get(col_nome, "")).strip()
+                if not nome or nome == "nan":
+                    continue
+                grau_raw = str(row.get(col_grau, "")).strip()
+                # Normalizar grau para get_nivel()
+                if "phd" in grau_raw.lower() or "doutor" in grau_raw.lower():
+                    grau = "PhD"
+                elif "msc" in grau_raw.lower() or "mestre" in grau_raw.lower():
+                    grau = "MSc"
+                elif "lic" in grau_raw.lower():
+                    grau = "Lic"
+                else:
+                    grau = grau_raw
+                records.append({
+                    "Nome":         nome,
+                    "Grau":         grau,
+                    "Cargo":        str(row.get(col_cargo, "Docente")).strip() if col_cargo else "Docente",
+                    "Departamento": str(row.get(col_dept,  "")).strip()        if col_dept  else "",
+                })
+            if records:
+                return records
     return MEMBERS_DEFAULT
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=180, show_spinner=False)
 def load_subsidios() -> dict:
     """Carrega tabela de subsídios. Fallback para SUBSIDIOS_DEFAULT."""
     df = load_sheet("TABELA_SUBSIDIOS")
-    if df is not None and "Funcao" in df.columns and "Tipo" in df.columns and "Valor" in df.columns:
-        result = {}
-        for _, row in df.iterrows():
-            try:
-                result[(str(row["Funcao"]).strip(), str(row["Tipo"]).strip())] = float(row["Valor"])
-            except (ValueError, TypeError):
-                pass
-        if result:
-            return result
+    if df is not None:
+        col_f = next((c for c in df.columns if "func" in c.lower()), None)
+        col_t = next((c for c in df.columns if "tipo" in c.lower()),  None)
+        col_v = next((c for c in df.columns if "valor" in c.lower() or "bruto" in c.lower()), None)
+        if col_f and col_t and col_v:
+            result = {}
+            for _, row in df.iterrows():
+                try:
+                    result[(str(row[col_f]).strip(), str(row[col_t]).strip())] = float(row[col_v])
+                except (ValueError, TypeError):
+                    pass
+            if result:
+                return result
     return SUBSIDIOS_DEFAULT
 
 
@@ -486,8 +571,13 @@ with st.sidebar:
         f'<div style="font-size:10px;color:{"#1E7145" if GS_OK else "#854F0B"};'
         f'margin-bottom:.3rem">'
         f'{"🟢 Google Sheets ligado" if GS_OK else "🟡 Modo offline (dados locais)"}'
-        f'</div>',
-        unsafe_allow_html=True,
+        # Botão de forçar actualização do Google Sheets
+    if st.sidebar.button("🔄 Actualizar dados (GSheets)", key="btn_refresh_gs",
+                         use_container_width=True):
+        load_sheet.clear()
+        load_members.clear()
+        load_subsidios.clear()
+        st.rerun()
     )
     st.markdown("---")
 

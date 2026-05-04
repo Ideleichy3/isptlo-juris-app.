@@ -558,27 +558,34 @@ with st.sidebar:
     logo_html = (f'<img src="{LOGO_SRC}" style="width:52px;height:52px;'
                  f'border-radius:50%;border:2px solid #FFD700;margin-right:10px"/>'
                  if LOGO_SRC else "")
+    
     st.markdown(
         f'<div style="display:flex;align-items:center;padding:.4rem 0">'
         f'{logo_html}'
-        f'<div><div style="color:#FFD700;font-weight:700;font-size:14px">'
-        f'ISPTLO-JURIS</div>'
-        f'<div style="color:#AABBDD;font-size:10px">Gestão de Júris v{APP_VER}</div></div>'
+        f'<div><div style="color:#FFD700;font-weight:700;font-size:12px">'
+        f'Plataforma de Gestão</div>' # Título Profissional
+        f'<div style="color:#AABBDD;font-size:10px">de Júris Académicos v{APP_VER}</div></div>'
         f'</div>',
-        unsafe_allow_html=True,
-    )
+        unsafe_allow_html=True
+    ) # <-- O parêntese deve fechar aqui!
+
+    st.markdown("---")
+
+    # 1. Indicador de estado (agora correctamente identado)
     st.markdown(
         f'<div style="font-size:10px;color:{"#1E7145" if GS_OK else "#854F0B"};'
         f'margin-bottom:.3rem">'
-        f'{"🟢 Google Sheets ligado" if GS_OK else "🟡 Modo offline (dados locais)"}'
-        # Botão de forçar actualização do Google Sheets
-    if st.sidebar.button("🔄 Actualizar dados (GSheets)", key="btn_refresh_gs",
-                         use_container_width=True):
+        f'{"🟢 Google Sheets ligado" if GS_OK else "🟡 Modo offline (dados locais)"}</div>',
+        unsafe_allow_html=True
+    )
+
+    # 2. Botão de actualização (dentro do bloco 'with st.sidebar')
+    if st.button("🔄 Actualizar dados (GSheets)", key="btn_refresh_gs", use_container_width=True):
         load_sheet.clear()
         load_members.clear()
         load_subsidios.clear()
         st.rerun()
-    )
+
     st.markdown("---")
 
     modo = st.radio("Modo", ["👤 Docente","🏦 Tesouraria"],
